@@ -97,7 +97,6 @@ fun ImageImportScreen() {
 }
 
 fun bitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
-    // Assuming the model takes a 224x224 RGB image
     val byteBuffer = ByteBuffer.allocateDirect(4 * imageSize * imageSize * 3)
     byteBuffer.order(ByteOrder.nativeOrder())
     val intValues = IntArray(imageSize * imageSize)
@@ -114,9 +113,11 @@ fun bitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
     return byteBuffer
 }
 
+fun calcProcent(n: Float): String {
+    return (n * 100).toInt().toString() + "%"
+}
+
 fun classifyImage(context: Context, bitmap: Bitmap): String {
-    // val bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.cherry_4)
-    // Resize to match the model's expected input size
     val resizedBitmap: Bitmap = Bitmap.createScaledBitmap(bitmap, imageSize, imageSize, true)
     val byteBuffer:  ByteBuffer = bitmapToByteBuffer(resizedBitmap)
 
@@ -129,15 +130,12 @@ fun classifyImage(context: Context, bitmap: Bitmap): String {
 
     model.close()
 
-//    return if (results[0] > 0.5) "Rose ${(results[0] * 100).toInt()}%"
-//    else "Barbados Cherry ${(results[1] * 100).toInt()}%"
-    return "results[0]: ${results[0]}, results[1]: ${results[1]}"
+    return if (results[0] > 0.5) "Pneumonia ${calcProcent(results[0])}" else "Normal ${calcProcent(results[1])}"
 }
 
 @Composable
 fun ImageClassifier(bitmap: Bitmap) {
     val context = LocalContext.current
-    // val bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.cherry_4)
     val classificationResult = classifyImage(context, bitmap)
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
